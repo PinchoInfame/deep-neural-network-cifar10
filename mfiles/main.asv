@@ -1,0 +1,173 @@
+% Add necessary paths for CIFAR-10 data and utility functions
+addpath cifar-10-matlab/cifar-10-batches-mat/;
+clc 
+close all
+addpath('utils')
+
+%reading data
+% [X_tra, Y_tra, y_tra] = LoadBatch('cifar-10-batches-mat/data_batch_1.mat');
+% [X_val, Y_val, y_val] = LoadBatch('cifar-10-batches-mat/data_batch_2.mat');
+
+% Load CIFAR-10 training batches and test batch using LoadBatch function
+[X_tra1, Y_tra1, y_tra1] = LoadBatch('cifar-10-batches-mat/data_batch_1.mat');
+[X_tra2, Y_tra2, y_tra2] = LoadBatch('cifar-10-batches-mat/data_batch_2.mat');
+[X_tra3, Y_tra3, y_tra3] = LoadBatch('cifar-10-batches-mat/data_batch_3.mat');
+[X_tra4, Y_tra4, y_tra4] = LoadBatch('cifar-10-batches-mat/data_batch_4.mat');
+[X_tra5, Y_tra5, y_tra5] = LoadBatch('cifar-10-batches-mat/data_batch_5.mat');
+
+% Concatenate all training batches into one dataset
+X_tra = [X_tra1 X_tra2 X_tra3 X_tra4 X_tra5];
+Y_tra = [Y_tra1 Y_tra2 Y_tra3 Y_tra4 Y_tra5];
+y_tra = [y_tra1; y_tra2; y_tra3; y_tra4; y_tra5];
+% Load the test batch
+[X_tes, Y_tes, y_tes] = LoadBatch('cifar-10-batches-mat/test_batch.mat');
+
+% Determine dataset dimensions:
+% K = number of classes, d = input dimension, N = number of training samples
+K = size(Y_tra, 1);
+d = size(X_tra, 1);
+N = size(X_tra, 2);
+
+% Normalize the training data (zero mean and unit variance)
+mean_x_tra = mean(X_tra, 2);
+std_x_tra = std(X_tra, 0, 2);
+X_tra = X_tra - repmat(mean_x_tra, [1, size(X_tra, 2)]);
+X_tra = X_tra ./ repmat(std_x_tra, [1, size(X_tra, 2)]);
+
+% Normalize the test data using training data mean and std
+X_tes = X_tes - repmat(mean_x_tra, [1, size(X_tes, 2)]);
+X_tes = X_tes ./ repmat(std_x_tra, [1, size(X_tes, 2)]);
+
+% Define the architecture of the neural network:
+% Here, two hidden layers with 50 neurons each
+m = [50 50]; %can be a vector
+%m= [50 30 20 20 10 10 10 10];
+k = size(m,2)+1;
+[W, b] = InitParam(m, K, d);
+%check gradients
+% ndim = 20;
+% lambda = 0;
+% n_batch = 1;
+% W_red=W;
+% W_red{1} = W{1}(:, 1:ndim);
+% X_red = X_tra(1:ndim, 1:n_batch);
+% Y_red = Y_tra(:, 1:n_batch);
+% [P, h] = EvaluateClassifier(X_red, W_red, b, k);
+% [ngrad_b, ngrad_W] = ComputeGradsNumSlow(X_red, Y_red, W_red, b, lambda, 1e-5, k);
+% [grad_W, grad_b] = ComputeGradients(X_red, Y_red, P, W_red, lambda, h, k);
+% ngrad_W=ngrad_W.';
+% ngrad_b=ngrad_b.';
+% eps = 10e-6;
+% for i=1:length(W_red)
+%     err_W{i}=abs(grad_W{i}-ngrad_W{i}) ./ max(eps, abs(grad_W{i})+abs(ngrad_W{i}));
+%     err_b{i}=abs(grad_b{i}-ngrad_b{i}) ./ max(eps, abs(grad_b{i})+abs(ngrad_b{i}));
+%     err_max_W{i} = max(max(err_W{i}));
+%     err_max_b{i} = (max(err_b{i}));
+% end
+
+%Mini-batch gradient descent algorithm without bn
+% lambda = 0.005;
+% GDparams.eta_min = 1e-5;
+% GDparams.eta_max = 1e-1;
+% GDparams.n_batch = 100;
+% GDparams.ns = 5*50000/GDparams.n_batch;
+% GDparams.n_epochs = 25;
+% [Wstar, bstar, J_train, J_val, Loss_train, Loss_val, acc_train, acc_val] = MiniBatchGD(X_tra, Y_tra, y_tra, X_tes, Y_tes, y_tes, GDparams, W, b, lambda, k);
+% max_acc_train = max(acc_train);
+% max_acc_val = max(acc_val);
+
+% epochs = 1:GDparams.n_epochs;
+% figure(1)
+% plot(J_train)
+% hold on
+% plot(J_val)
+% legend('training data cost', 'validation data cost')
+% xlabel('epoch')
+% ylabel('cost')
+% hold off
+
+% figure(2)
+% plot(Loss_train)
+% hold on
+% plot(Loss_val)
+% legend('training data loss', 'validation data loss')
+% xlabel('epoch')
+% ylabel('loss')
+% hold off
+
+% figure(3)
+% plot(acc_train)
+% hold on
+% plot(acc_val)
+% legend('training data accuracy', 'validation data accuracy')
+% xlabel('epoch')
+% ylabel('accuracy')
+% hold off
+
+%check gradients for the k-layer NN with batch normalization
+% ndim = 20;
+% lambda = 0;
+% n_batch = 20;
+% W_red=W;
+% W_red{1} = W{1}(:, 1:ndim);
+% X_red = X_tra(1:ndim, 1:n_batch);
+% Y_red = Y_tra(:, 1:n_batch);
+% [P, h, S, mu, v, S_hat] = EvaluateClassifier(X_red, W_red, b, k);
+% [ngrad_b, ngrad_W] = ComputeGradsNumSlow(X_red, Y_red, W_red, b, lambda, 1e-6, k);
+% [grad_W, grad_b] = ComputeGradients(X_red, Y_red, P, W_red, lambda, h, k, S, S_hat, mu, v);
+% ngrad_W=ngrad_W.';
+% ngrad_b=ngrad_b.';
+% eps = 10e-5;
+% for i=1:length(W_red)
+%     err_W{i}=abs(grad_W{i}-ngrad_W{i}) ./ max(eps, abs(grad_W{i})+abs(ngrad_W{i}));
+%     err_b{i}=abs(grad_b{i}-ngrad_b{i}) ./ max(eps, abs(grad_b{i})+abs(ngrad_b{i}));
+%     err_max_W{i} = max(max(err_W{i}));
+%     err_max_b{i} = (max(err_b{i}));
+% end
+
+%Mini-batch gradient descent algorithm with bn
+lambda = 0.004749; 
+GDparams.eta_min = 1e-5;
+GDparams.eta_max = 1e-1;
+GDparams.n_batch = 100;
+GDparams.ns = 2*50000/GDparams.n_batch;
+GDparams.n_cycles = 3;
+%GDparams.n_epochs = floor((GDparams.n_cycles*GDparams.n_batch*GDparams.ns)/(GDparams.n_batch*100));
+GDparams.n_epochs = 20;
+GDparams.alpha = 0.9;
+[Wstar, bstar, J_train, J_val, Loss_train, Loss_val, acc_train, acc_val] = MiniBatchGD(X_tra, Y_tra, y_tra, X_tes, Y_tes, y_tes, GDparams, W, b, lambda, k);
+max_acc_train = max(acc_train);
+max_acc_val = max(acc_val);
+
+epochs = 1:GDparams.n_epochs;
+figure(1)
+plot(J_train)
+hold on
+plot(J_val)
+legend('training data cost', 'validation data cost')
+xlabel('epoch')
+ylabel('cost')
+hold off
+
+figure(2)
+plot(Loss_train)
+hold on
+plot(Loss_val)
+legend('training data loss', 'validation data loss')
+xlabel('epoch')
+ylabel('loss')
+hold off
+
+figure(3)
+plot(acc_train)
+hold on
+plot(acc_val)
+legend('training data accuracy', 'validation data accuracy')
+xlabel('epoch')
+ylabel('accuracy')
+hold off
+
+%Coarse to fine search for lambda
+%GDparams.n_cycles = 2;
+%GDparams.n_epochs = floor((GDparams.n_cycles*GDparams.n_batch*GDparams.ns)/(GDparams.n_batch*100));
+%[acc_train, acc_val] = SearchLambda(X_tra, Y_tra, y_tra, X_tes, Y_tes, y_tes, W, b, GDparams, k);
