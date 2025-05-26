@@ -13,8 +13,15 @@ This project implements a deep neural network in MATLAB to classify images from 
 ---
 
 ## Project Structure
-<pre> <code> deep-neural-network-cifar10/ ├── mfiles/ │ ├── main.m # Main script to run training and evaluation │ ├── utils/ # Utility functions like LoadBatch.m, InitParam.m, etc. ├── cifar-10-batches-mat/ # CIFAR-10 dataset files (.mat) └── README.md # This file </code> </pre>
-
+```
+deep-neural-network-cifar10/
+├── mfiles/                  
+│   ├── main.m                # Main script to run training and evaluation
+│   └── utils/                # Utility functions like LoadBatch.m, InitParam.m, etc.
+├── cifar-10-batches-mat/     # CIFAR-10 dataset files (.mat)
+├── assignments/              # Project instructions
+└── README.md                 # Project documentation
+```
 ---
 
 ## Setup Instructions
